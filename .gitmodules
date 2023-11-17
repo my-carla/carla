@@ -1,12 +1,3 @@
-[submodule "ThirdParty/llvm"]
-	path = ThirdParty/llvm
-	url = https://github.com/llvm-mirror/llvm.git
-[submodule "ThirdParty/libcxx"]
-	path = ThirdParty/libcxx
-	url = https://github.com/llvm-mirror/libcxx.git
-[submodule "ThirdParty/libcxxabi"]
-	path = ThirdParty/libcxxabi
-	url = https://github.com/llvm-mirror/libcxxabi.git
 [submodule "ThirdParty/boost-carla"]
 	path = ThirdParty/boost-carla
 	url = git@github.com:my-carla/boost-carla.git
@@ -40,3 +31,6 @@
 [submodule "ThirdParty/eigen-carla"]
 	path = ThirdParty/eigen-carla
 	url = git@github.com:my-carla/eigen-carla.git
+[submodule "ThirdParty/llvm-carla"]
+	path = ThirdParty/llvm-carla
+	url = git@github.com:my-carla/llvm-carla.git

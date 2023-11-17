@@ -33,6 +33,7 @@ Plugins
 *.workspace
 *CodeCompletionFolders.txt
 *CodeLitePreProcessor.txt
+*.tar.gz
 .aria2c.input
 .codelite
 .gdb_history
