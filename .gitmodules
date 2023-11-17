@@ -1,3 +1,9 @@
 [submodule "ThirdParty/llvm"]
 	path = ThirdParty/llvm
 	url = https://github.com/llvm-mirror/llvm.git
+[submodule "ThirdParty/libcxx"]
+	path = ThirdParty/libcxx
+	url = https://github.com/llvm-mirror/libcxx.git
+[submodule "ThirdParty/libcxxabi"]
+	path = ThirdParty/libcxxabi
+	url = https://github.com/llvm-mirror/libcxxabi.git
