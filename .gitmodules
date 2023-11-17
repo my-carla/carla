@@ -1,0 +1,3 @@
+[submodule "ThirdParty/llvm"]
+	path = ThirdParty/llvm
+	url = https://github.com/llvm-mirror/llvm.git
