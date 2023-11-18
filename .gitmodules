@@ -31,6 +31,3 @@
 [submodule "ThirdParty/eigen-carla"]
 	path = ThirdParty/eigen-carla
 	url = git@github.com:my-carla/eigen-carla.git
-[submodule "ThirdParty/llvm-carla"]
-	path = ThirdParty/llvm-carla
-	url = git@github.com:my-carla/llvm-carla.git
