@@ -1,9 +1,388 @@
-# llvm
+# boost
+set(boost_src ${CMAKE_BINARY_DIR}/boost-carla)
+set(boost_install_dir ${install_dir}/boost-carla)
 
-set(LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY OFF)
-set(LIBCXX_INSTALL_EXPERIMENTAL_LIBRARY OFF)
-set(LLVM_ENABLE_EH OFF)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
-set(CMAKE_INSTALL_PREFIX Install)
 
-add_subdirectory(llvm)
+file(COPY boost-carla DESTINATION ${CMAKE_BINARY_DIR})
+
+set(BOOST_TOOLSET "clang-10.0")
+set(BOOST_CFLAGS "-fPIC -std=c++14 -DBOOST_ERROR_CODE_HEADER_ONLY")
+
+find_package(Python COMPONENTS Interpreter Development)
+
+execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys; print(sys.prefix)"
+                OUTPUT_VARIABLE python_root
+                OUTPUT_STRIP_TRAILING_WHITESPACE )
+
+execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;x='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(x)"
+                OUTPUT_VARIABLE python_ver
+                OUTPUT_STRIP_TRAILING_WHITESPACE )
+
+
+add_custom_command(
+    OUTPUT ${boost_src}/b2
+    WORKING_DIRECTORY ${boost_src}
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${boost_src}/bootstrap.sh
+        --with-toolset=clang
+        --prefix=${boost_install_dir}
+        --with-libraries=python,filesystem,system,program_options
+        --with-python=${Python_EXECUTABLE}
+        --with-python-root=${python_root}
+)
+
+add_custom_target(
+    boost_stage_release
+    DEPENDS ${boost_src}/b2
+    WORKING_DIRECTORY ${boost_src}
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${boost_src}/b2 toolset=${BOOST_TOOLSET} cxxflags=${BOOST_CFLAGS}
+        --prefix=${boost_install_dir}
+        -j ${CARLA_BUILD_CONCURRENCY}
+        stage
+        release
+)
+
+
+add_custom_target(
+    boost_build_install
+    DEPENDS ${boost_src}/b2
+    WORKING_DIRECTORY ${boost_src}
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${boost_src}/b2
+        toolset=${BOOST_TOOLSET} cxxflags=${BOOST_CFLAGS}
+        --prefix=${boost_install_dir}
+        -j ${CARLA_BUILD_CONCURRENCY}
+        install
+)
+
+if(${TRAVIS})
+    write_file(
+        $ENV{HOME}/user-config.jam
+        "using python : ${python_ver} : ${python_root}/bin/python${PY_VERSION} ;")
+else()
+    write_file(
+        ${boost_src}/project-config.jam
+        "using python : ${python_ver} : ${python_root}/bin/python${PY_VERSION} ;")
+endif(${TRAVIS})
+
+
+add_custom_target(
+    install_boost
+    DEPENDS boost_stage_release boost_build_install
+)
+
+
+# rpclib
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(rpclib_libcxx_install_dir ${install_dir}/rpclib-libcxx)
+# set(rpclib_libstdcxx_install_dir ${install_dir}/rpclib-libstdcxx)
+# file(COPY rpclib DESTINATION ${CMAKE_CURRENT_LIST_DIR}/tmp/rpclib-libcxx)
+# file(COPY rpclib DESTINATION ${CMAKE_CURRENT_LIST_DIR}/tmp/rpclib-libstdcxx)
+
+# libc++
+set(CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH} -DBOOST_NO_EXCEPTIONS -DASIO_NO_EXCEPTIONS ${UNREAL_HOSTED_CFLAGS}")
+set(CMAKE_INSTALL_PREFIX ${rpclib_libcxx_install_dir})
+add_subdirectory(rpclib)
+
+# # libstdc++
+# set(CMAKE_CXX_FLAGS "-fPIC -std=c++14")
+# set(CMAKE_INSTALL_PREFIX ${rpclib_libstdcxx_install_dir})
+# add_subdirectory(tmp/rpclib-libstdcxx/rpclib)
+
+# recover cmake var
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
+
+
+add_custom_target(
+    install_rpclib_libcxx
+    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/rpclib
+)
+
+# add_custom_target(
+#     install_rpclib_libstdcxx
+#     COMMAND make install
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/tmp/rpclib-libstdcxx/rpclib
+# )
+
+# all
+
+# add_custom_target(
+#     clean_tmp
+#     COMMAND rm -rf ./tmp
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+# )
+
+
+# gtest
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(gtest_install_dir ${install_dir}/gtest)
+
+set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH} -DBOOST_NO_EXCEPTIONS -fno-exceptions ${UNREAL_HOSTED_CFLAGS}")
+set(CMAKE_INSTALL_PREFIX "${gtest_install_dir}")
+add_subdirectory(googletest)
+
+add_custom_target(
+    install_gtest
+    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/googletest
+)
+
+# recover cmake var
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
+
+
+# Recast&Detour
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(recast_install_dir ${install_dir}/recast)
+
+set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC")
+set(CMAKE_INSTALL_PREFIX ${recast_install_dir})
+set(RECASTNAVIGATION_DEMO False)
+set(RECASTNAVIGATION_TEST False)
+add_subdirectory(recastnavigation)
+
+add_custom_target(
+    install_recast
+    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY} &&
+        cp ${recast_install_dir}/bin/RecastBuilder ${RECAST_INSTALL_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/recastnavigation
+)
+
+# recover cmake var
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
+
+
+# libpng
+set(libpng_install_dir ${install_dir}/libpng)
+file(COPY libpng-carla DESTINATION ${CMAKE_BINARY_DIR})
+
+add_custom_target(
+    build_libpng
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ./configure --prefix=${libpng_install_dir}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/libpng-carla
+)
+
+add_custom_target(
+    install_libpng
+    DEPENDS build_libpng
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/libpng-carla
+)
+
+
+# libxerces
+file(COPY xerces-carla DESTINATION ${CMAKE_BINARY_DIR})
+set(xerces_src ${CMAKE_BINARY_DIR}/xerces-carla)
+set(xerces_install_dir ${install_dir}/xerces)
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -fPIC -w -I${LLVM_INCLUDE} -L${LLVM_LIBPATH}")
+set(CMAKE_INSTALL_PREFIX ${xerces_install_dir})
+set(CMAKE_BUILD_TYPE Release)
+set(BUILD_SHARED_LIBS OFF)
+set(transcoder gnuiconv)
+set(network OFF)
+
+add_custom_target(
+    build_xerces
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+        -Dtranscoder=${transcoder}
+        -Dnetwork=${network}
+        .
+    WORKING_DIRECTORY ${xerces_src}
+)
+
+
+add_custom_target(
+    install_xerces
+    DEPENDS build_xerces
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${xerces_src}
+)
+
+# recover cmake var
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
+
+
+# eigen
+set(eigen_src ${CMAKE_CURRENT_LIST_DIR}/eigen-carla)
+set(eigen_install_dir ${install_dir}/eigen)
+set(eigen_install_include ${eigen_install_dir}/include)
+
+add_custom_target(
+    install_eigen
+    COMMAND mkdir -p ${eigen_install_include}/unsupported/Eigen &&
+        cp -R ${eigen_src}/Eigen ${eigen_install_include} &&
+        cp -R ${eigen_src}/unsupported/Eigen ${eigen_install_include}/unsupported/Eigen
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
+
+# Chrono
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+# install eigen for chrono
+set(eigen4chrono_src ${CMAKE_CURRENT_LIST_DIR}/eigen-for-chrono)
+set(eigen4chrono_install_dir ${install_dir}/eigen-for-chrono)
+set(eigen4chrono_install_include ${eigen_install_dir}/include)
+
+add_custom_target(
+    install_eigen
+    COMMAND mkdir -p ${eigen4chrono_install_include}/unsupported/Eigen &&
+        cp -R ${eigen4chrono_src}/Eigen ${eigen4chrono_install_include} &&
+        cp -R ${eigen4chrono_src}/unsupported/Eigen ${eigen4chrono_install_include}/unsupported/Eigen
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
+# build and install chrono
+file(COPY chrono DESTINATION ${CMAKE_BINARY_DIR})
+set(chrono_src ${CMAKE_BINARY_DIR}/chrono)
+set(chrono_install_dir ${install_dir}/chrono)
+
+
+set(CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -L${LLVM_LIBPATH} -Wno-unused-command-line-argument ${UNREAL_HOSTED_CFLAGS}")
+set(EIGEN3_INCLUDE_DIR ${eigen4chrono_install_include})
+set(CMAKE_INSTALL_PREFIX ${chrono_install_dir})
+set(CMAKE_BUILD_TYPE Release)
+set(ENABLE_MODULE_VEHICLE ON)
+
+add_custom_target(
+    build_chrono
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DEIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DENABLE_MODULE_VEHICLE=${ENABLE_MODULE_VEHICLE}
+        .
+    WORKING_DIRECTORY ${chrono_src}
+)
+
+add_custom_target(
+    install_chrono
+    DEPENDS build_chrono
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install
+    WORKING_DIRECTORY ${chrono_src}
+)
+
+
+# recover cmake var
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
+
+
+# Sqlite3
+file(COPY sqlite-carla DESTINATION ${CMAKE_BINARY_DIR})
+set(sqlite_src ${CMAKE_BINARY_DIR}/sqlite-carla)
+set(sqlite_install_dir ${install_dir}/sqlite)
+
+
+add_custom_target(
+    build_sqlite
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC -w";
+        ./configure --prefix=${sqlite_install_dir}
+    WORKING_DIRECTORY ${sqlite_src}
+)
+
+add_custom_target(
+    install_sqlite
+    DEPENDS build_sqlite
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC -w";
+        make && make install
+    WORKING_DIRECTORY ${sqlite_src}
+)
+
+
+# proj
+file(COPY proj-carla DESTINATION ${CMAKE_BINARY_DIR})
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(proj_install_dir ${install_dir}/proj)
+set(proj_src ${CMAKE_BINARY_DIR}/proj)
+
+
+set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH}")
+set(SQLITE3_INCLUDE_DIR ${sqlite_install_dir}/include)
+set(SQLITE3_LIBRARY ${sqlite_install_dir}/lib/libsqlite3.a)
+set(EXE_SQLITE3 ${sqlite_install_dir}/bin/sqlite3)
+set(ENABLE_TIFF OFF)
+set(ENABLE_CURL OFF)
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_PROJSYNC OFF)
+set(CMAKE_BUILD_TYPE Release)
+set(BUILD_PROJINFO OFF)
+set(BUILD_CCT OFF)
+set(BUILD_CS2CS OFF)
+set(BUILD_GEOD OFF)
+set(BUILD_GIE OFF)
+set(BUILD_PROJ OFF)
+set(BUILD_TESTING OFF)
+set(CMAKE_INSTALL_PREFIX ${proj_install_dir})
+
+add_custom_target(
+    build_proj
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DSQLITE3_INCLUDE_DIR=${SQLITE3_INCLUDE_DIR}
+        -DSQLITE3_LIBRARY=${SQLITE3_LIBRARY}
+        -DEXE_SQLITE3=${EXE_SQLITE3}
+        -DENABLE_TIFF=${ENABLE_TIFF}
+        -DENABLE_CURL=${ENABLE_CURL}
+        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+        -DBUILD_PROJSYNC=${BUILD_PROJSYNC}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DBUILD_PROJINFO=${BUILD_PROJINFO}
+        -DBUILD_CCT=${BUILD_CCT}
+        -DBUILD_CS2CS=${BUILD_CS2CS}
+        -DBUILD_GEOD=${BUILD_GEOD}
+        -DBUILD_GIE=${BUILD_GIE}
+        -DBUILD_PROJ=${BUILD_PROJ}
+        -DBUILD_TESTING=${BUILD_TESTING}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        .
+    WORKING_DIRECTORY ${proj_src}
+)
+
+add_custom_target(
+    install_proj
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install
+    WORKING_DIRECTORY ${proj_src}
+)
+
+
+# patchelf
+
+
+
+# all
+
+add_custom_target(
+    third_party ALL
+    DEPENDS install_boost install_rpclib_libcxx
+            install_gtest install_recast install_libpng
+            install_xerces install_eigen install_chrono
+            install_sqlite install_proj
+)

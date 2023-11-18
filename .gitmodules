@@ -31,3 +31,6 @@
 [submodule "ThirdParty/eigen-carla"]
 	path = ThirdParty/eigen-carla
 	url = git@github.com:my-carla/eigen-carla.git
+[submodule "ThirdParty/eigen-for-chrono"]
+	path = ThirdParty/eigen-for-chrono
+	url = git@github.com:my-carla/eigen-for-chrono.git
