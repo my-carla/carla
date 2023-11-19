@@ -6,3 +6,13 @@ set(LLVM_INCLUDE "$ENV{UE4_ROOT}/Engine/Source/ThirdParty/Linux/LibCxx/include/c
 set(LLVM_LIBPATH "$ENV{UE4_ROOT}/Engine/Source/ThirdParty/Linux/LibCxx/lib/Linux/x86_64-unknown-linux-gnu")
 set(UNREAL_HOSTED_CFLAGS "--sysroot=$ENV{UE4_ROOT}/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v17_clang-10.0.1-centos7/x86_64-unknown-linux-gnu/")
 set(RECAST_INSTALL_DIR "${PROJECT_SOURCE_DIR}/Util/DockerUtils/dist")
+
+set(CARLA_PYTHONAPI_ROOT_FOLDER ${PROJECT_SOURCE_DIR}/PythonAPI)
+set(CARLA_PYTHONAPI_SOURCE_FOLDER ${CARLA_PYTHONAPI_ROOT_FOLDER}/carla)
+set(LIBCARLA_INSTALL_CLIENT_FOLDER ${CARLA_PYTHONAPI_SOURCE_FOLDER}/dependencies)
+
+set(CARLAUE4_PLUGIN_ROOT_FOLDER ${PROJECT_SOURCE_DIR}/Unreal/CarlaUE4/Plugins/Carla)
+set(LIBCARLA_INSTALL_SERVER_FOLDER ${CARLAUE4_PLUGIN_ROOT_FOLDER}/CarlaDependencies)
+
+set(CARLAUE4_ROOT_FOLDER ${PROJECT_SOURCE_DIR}/Unreal/CarlaUE4)
+set(CARLAUE4_PLUGIN_ROOT_FOLDER ${CURPROJECT_SOURCE_DIRDIR}/Unreal/CarlaUE4/Plugins/Carla)

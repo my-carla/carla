@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(OsmMapRenderer)
+set(osm_3rd_install_dir ${install_dir}/OsmRenderer3rd)
 
 # Libosmscout and Luna SVG Library
-include_directories(ThirdParties/include)
-include_directories(ThirdParties/include/lunasvg)
-link_directories(ThirdParties/lib)
+add_subdirectory(ThirdParties)
+
+include_directories(${osm_3rd_install_dir}/include)
+include_directories(${osm_3rd_install_dir}/include/lunasvg)
+link_directories(${osm_3rd_install_dir}/lib)
 
 add_definitions(-D_USE_MATH_DEFINES)
 

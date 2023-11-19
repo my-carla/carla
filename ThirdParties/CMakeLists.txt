@@ -246,7 +246,7 @@ set(eigen4chrono_install_dir ${install_dir}/eigen-for-chrono)
 set(eigen4chrono_install_include ${eigen_install_dir}/include)
 
 add_custom_target(
-    install_eigen
+    install_eigen4chrono
     COMMAND mkdir -p ${eigen4chrono_install_include}/unsupported/Eigen &&
         cp -R ${eigen4chrono_src}/Eigen ${eigen4chrono_install_include} &&
         cp -R ${eigen4chrono_src}/unsupported/Eigen ${eigen4chrono_install_include}/unsupported/Eigen
@@ -267,6 +267,7 @@ set(ENABLE_MODULE_VEHICLE ON)
 
 add_custom_target(
     build_chrono
+    DEPENDS install_eigen4chrono
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${CMAKE_COMMAND}
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
@@ -374,7 +375,126 @@ add_custom_target(
 
 
 # patchelf
+file(COPY patchelf DESTINATION ${CMAKE_BINARY_DIR})
+set(patchelf_src ${CMAKE_BINARY_DIR}/patchelf)
+set(patchelf_install_dir ${install_dir}/patchelf)
 
+add_custom_target(
+    build_patchelf
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ./bootstrap.sh
+        ./configure --prefix=${patchelf_install_dir}
+        make
+    WORKING_DIRECTORY ${patchelf_src}
+)
+
+add_custom_target(
+    install_patchelf
+    DEPENDS build_patchelf
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install
+    WORKING_DIRECTORY ${patchelf_src}
+)
+
+
+# # pytorch
+
+# include(ExternalProject)
+# ExternalProject_Add(
+#     download_pytorch
+#     PREFIX extract_pytorch
+#     URL https://download.pytorch.org/libtorch/cu113/libtorch-shared-with-deps-1.11.0%2Bcu113.zip
+#     DOWNLOAD_DIR ${CMAKE_BINARY_DIR}
+#     DOWNLOAD_NAME pytorch.zip
+#     CONFIGURE_COMMAND ""
+#     BUILD_COMMAND ""
+#     INSTALL_COMMAND ""
+#     DOWNLOAD_NO_EXTRACT ON
+# )
+
+# add_custom_command(
+#     OUTPUT ${CMAKE_BINARY_DIR}/libtorch
+#     DEPENDS download_pytorch
+#     COMMAND unzip pytorch.zip
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+# )
+
+# OSM2ODR
+file(COPY sumo DESTINATION ${CMAKE_BINARY_DIR}/server)
+file(COPY sumo DESTINATION ${CMAKE_BINARY_DIR}/client)
+set(osm2odr_client_src ${CMAKE_BINARY_DIR}/client/sumo)
+set(osm2odr_server_src ${CMAKE_BINARY_DIR}/server/sumo)
+
+# for client
+set(client_G "Eclipse CDT4 - make")
+set(client_CMAKE_CXX_FLAGS "-stdlib=libstdc++")
+set(client_CMAKE_INSTALL_PREFIX ${LIBCARLA_INSTALL_CLIENT_FOLDER})
+set(client_PROJ_INCLUDE_DIR ${proj_install_dir}/include)
+set(client_PROJ_LIBRARY ${proj_install_dir}/lib/libproj.a)
+set(client_XercesC_INCLUDE_DIR ${proj_install_dir}/include)
+set(client_XercesC_LIBRARY ${proj_install_dir}/lib/libxerces-c.a)
+
+add_custom_target(
+    build_osm2odr_client
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -G ${client_G}
+        -DCMAKE_CXX_FLAGS=${client_CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${client_CMAKE_INSTALL_PREFIX}
+        -DPROJ_INCLUDE_DIR=${client_PROJ_INCLUDE_DIR}
+        -DPROJ_LIBRARY=${client_PROJ_LIBRARY}
+        -DXercesC_INCLUDE_DIR=${client_XercesC_INCLUDE_DIR}
+        -DXercesC_LIBRARY=${client_XercesC_LIBRARY}
+        .
+    WORKING_DIRECTORY ${osm2odr_client_src}
+)
+
+add_custom_target(
+    install_osm2odr_client
+    DEPENDS build_osm2odr_client
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install
+    WORKING_DIRECTORY ${osm2odr_client_src}
+)
+
+
+# for server
+set(server_G "Eclipse CDT4 - make")
+set(server_CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -L${LLVM_LIBPATH}")
+set(server_CMAKE_INSTALL_PREFIX ${LIBCARLA_INSTALL_SERVER_FOLDER})
+set(server_PROJ_INCLUDE_DIR ${proj_install_dir}/include)
+set(server_PROJ_LIBRARY ${proj_install_dir}/lib/libproj.a)
+set(server_XercesC_INCLUDE_DIR ${proj_install_dir}/include)
+set(server_XercesC_LIBRARY ${proj_install_dir}/lib/libxerces-c.a)
+
+add_custom_target(
+    build_osm2odr_server
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -G ${server_G}
+        -DCMAKE_CXX_FLAGS=${server_CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${server_CMAKE_INSTALL_PREFIX}
+        -DPROJ_INCLUDE_DIR=${server_PROJ_INCLUDE_DIR}
+        -DPROJ_LIBRARY=${server_PROJ_LIBRARY}
+        -DXercesC_INCLUDE_DIR=${server_XercesC_INCLUDE_DIR}
+        -DXercesC_LIBRARY=${server_XercesC_LIBRARY}
+        .
+    WORKING_DIRECTORY ${osm2odr_server_src}
+)
+
+add_custom_target(
+    install_osm2odr_server
+    DEPENDS build_osm2odr_server
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install
+    WORKING_DIRECTORY ${osm2odr_server_src}
+)
+
+
+add_custom_target(
+    install_osm2odr
+    DEPENDS install_osm2odr_client install_osm2odr_client
+)
 
 
 # all
@@ -384,5 +504,6 @@ add_custom_target(
     DEPENDS install_boost install_rpclib_libcxx
             install_gtest install_recast install_libpng
             install_xerces install_eigen install_chrono
-            install_sqlite install_proj
+            install_sqlite install_proj install_patchelf
+            install_osm2odr
 )

@@ -1,0 +1,66 @@
+set(utils_foxtools_STAT_SRCS
+   fxheader.h
+   fxexdefs.h
+   MFXBaseObject.cpp
+   MFXBaseObject.h
+   MFXButtonTooltip.cpp
+   MFXButtonTooltip.h
+   MFXDecalsTable.cpp
+   MFXDecalsTable.h
+   MFXToggleButtonTooltip.cpp
+   MFXToggleButtonTooltip.h
+   MFXCheckableButton.cpp
+   MFXCheckableButton.h
+   MFXComboBox.cpp
+   MFXComboBox.h
+   MFXGroupBoxModule.cpp
+   MFXGroupBoxModule.h
+   MFXComboBoxIcon.cpp
+   MFXComboBoxIcon.h
+   MFXListIcon.cpp
+   MFXListIcon.h
+   MFXListItemIcon.cpp
+   MFXListItemIcon.h
+   MFXImageHelper.cpp
+   MFXImageHelper.h
+   MFXInterThreadEventClient.h
+   MFXLabelTooltip.cpp
+   MFXLabelTooltip.h
+   MFXLCDLabel.cpp
+   MFXLCDLabel.h
+   MFXLinkLabel.cpp
+   MFXLinkLabel.h
+   MFXMenuButtonTooltip.cpp
+   MFXMenuButtonTooltip.h
+   MFXMenuCheckIcon.cpp
+   MFXMenuCheckIcon.h
+   MFXMenuHeader.cpp
+   MFXMenuHeader.h
+   MFXRealSpinner.cpp
+   MFXRealSpinner.h
+   MFXRecentNetworks.cpp
+   MFXRecentNetworks.h
+   MFXSevenSegment.cpp
+   MFXSevenSegment.h
+   MFXSingleEventThread.cpp
+   MFXSingleEventThread.h
+   MFXStaticToolTip.cpp
+   MFXStaticToolTip.h
+   MFXSynchQue.h
+   MFXSynchSet.h
+   MFXTextFieldIcon.cpp
+   MFXTextFieldIcon.h
+   MFXTextFieldTooltip.cpp
+   MFXTextFieldTooltip.h
+   MFXThreadEvent.cpp
+   MFXThreadEvent.h
+   MFXTreeListDynamic.cpp
+   MFXTreeListDynamic.h
+   MFXUtils.cpp
+   MFXUtils.h
+   MFXWorkerThread.h
+   MsgHandlerSynchronized.h
+)
+
+add_library(utils_foxtools STATIC ${utils_foxtools_STAT_SRCS})
+set_property(TARGET utils_foxtools PROPERTY PROJECT_LABEL "z_utils_foxtools")
