@@ -1,36 +1,36 @@
 [submodule "ThirdParty/boost-carla"]
-	path = ThirdParty/boost-carla
+	path = ThirdParties/boost-carla
 	url = git@github.com:my-carla/boost-carla.git
 [submodule "ThirdParty/rpclib"]
-	path = ThirdParty/rpclib
+	path = ThirdParties/rpclib
 	url = git@github.com:my-carla/rpclib.git
 [submodule "ThirdParty/googletest"]
-	path = ThirdParty/googletest
+	path = ThirdParties/googletest
 	url = https://github.com/google/googletest.git
 [submodule "ThirdParty/recastnavigation"]
-	path = ThirdParty/recastnavigation
+	path = ThirdParties/recastnavigation
 	url = https://github.com/carla-simulator/recastnavigation.git
 [submodule "ThirdParty/libpng-carla"]
-	path = ThirdParty/libpng-carla
+	path = ThirdParties/libpng-carla
 	url = git@github.com:my-carla/libpng-carla.git
 [submodule "ThirdParty/xerces-carla"]
-	path = ThirdParty/xerces-carla
+	path = ThirdParties/xerces-carla
 	url = git@github.com:my-carla/xerces-carla.git
 [submodule "ThirdParty/chrono"]
-	path = ThirdParty/chrono
+	path = ThirdParties/chrono
 	url = https://github.com/projectchrono/chrono.git
 [submodule "ThirdParty/patchelf"]
-	path = ThirdParty/patchelf
+	path = ThirdParties/patchelf
 	url = https://github.com/NixOS/patchelf.git
 [submodule "ThirdParty/proj-carla"]
-	path = ThirdParty/proj-carla
+	path = ThirdParties/proj-carla
 	url = git@github.com:my-carla/proj-carla.git
 [submodule "ThirdParty/sqlite-carla"]
-	path = ThirdParty/sqlite-carla
+	path = ThirdParties/sqlite-carla
 	url = git@github.com:my-carla/sqlite-carla.git
 [submodule "ThirdParty/eigen-carla"]
-	path = ThirdParty/eigen-carla
+	path = ThirdParties/eigen-carla
 	url = git@github.com:my-carla/eigen-carla.git
 [submodule "ThirdParty/eigen-for-chrono"]
-	path = ThirdParty/eigen-for-chrono
+	path = ThirdParties/eigen-for-chrono
 	url = git@github.com:my-carla/eigen-for-chrono.git
