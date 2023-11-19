@@ -35,13 +35,13 @@
 [submodule "ThirdParties/eigen-for-chrono"]
 	path = ThirdParties/eigen-for-chrono
 	url = git@github.com:my-carla/eigen-for-chrono.git
-# [submodule "ExtraPlugins/StreetMap"]
-# 	path = ExtraPlugins/StreetMap
-# 	url = https://github.com/carla-simulator/StreetMap.git
-# 	branch = master
 [submodule "osm-world-renderer/ThirdParties/libosmscout"]
 	path = osm-world-renderer/ThirdParties/libosmscout
 	url = https://github.com/Framstag/libosmscout.git
 [submodule "osm-world-renderer/ThirdParties/lunasvg"]
 	path = osm-world-renderer/ThirdParties/lunasvg
 	url = https://github.com/sammycage/lunasvg.git
+[submodule "ExtraPlugins/StreetMap"]
+	path = ExtraPlugins/StreetMap
+	url = https://github.com/carla-simulator/StreetMap.git
+	branch = master
