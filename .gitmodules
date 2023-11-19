@@ -38,10 +38,6 @@
 [submodule "ThirdParties/eigen-for-chrono"]
 	path = ThirdParties/eigen-for-chrono
 	url = git@github.com:my-carla/eigen-for-chrono.git
-[submodule "ThirdParties/sumo"]
-	path = ThirdParties/sumo
-	url = https://github.com/carla-simulator/sumo.git
-	branch = aaron/defaultsidewalkwidth
 [submodule "osm-world-renderer/ThirdParties/libosmscout"]
 	path = osm-world-renderer/ThirdParties/libosmscout
 	url = https://github.com/Framstag/libosmscout.git
@@ -52,3 +48,7 @@
 	path = ExtraPlugins/StreetMap
 	url = https://github.com/carla-simulator/StreetMap.git
 	branch = master
+[submodule "ThirdParties/sumo"]
+	path = ThirdParties/sumo
+	url = git@github.com:my-carla/sumo.git
+	branch = aaron/defaultsidewalkwidth
