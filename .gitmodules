@@ -4,12 +4,15 @@
 [submodule "ThirdParties/rpclib"]
 	path = ThirdParties/rpclib
 	url = git@github.com:my-carla/rpclib.git
+	branch = v2.2.1_c5
 [submodule "ThirdParties/googletest"]
 	path = ThirdParties/googletest
 	url = https://github.com/google/googletest.git
+	branch = release-1.8.1
 [submodule "ThirdParties/recastnavigation"]
 	path = ThirdParties/recastnavigation
 	url = https://github.com/carla-simulator/recastnavigation.git
+	branch = carla
 [submodule "ThirdParties/libpng-carla"]
 	path = ThirdParties/libpng-carla
 	url = git@github.com:my-carla/libpng-carla.git
@@ -35,6 +38,10 @@
 [submodule "ThirdParties/eigen-for-chrono"]
 	path = ThirdParties/eigen-for-chrono
 	url = git@github.com:my-carla/eigen-for-chrono.git
+[submodule "ThirdParties/sumo"]
+	path = ThirdParties/sumo
+	url = https://github.com/carla-simulator/sumo.git
+	branch = aaron/defaultsidewalkwidth
 [submodule "osm-world-renderer/ThirdParties/libosmscout"]
 	path = osm-world-renderer/ThirdParties/libosmscout
 	url = https://github.com/Framstag/libosmscout.git

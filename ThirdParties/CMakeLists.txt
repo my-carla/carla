@@ -1,8 +1,6 @@
 # boost
 set(boost_src ${CMAKE_BINARY_DIR}/boost-carla)
 set(boost_install_dir ${install_dir}/boost-carla)
-
-
 file(COPY boost-carla DESTINATION ${CMAKE_BINARY_DIR})
 
 set(BOOST_TOOLSET "clang-10.0")
@@ -36,7 +34,9 @@ add_custom_target(
     DEPENDS ${boost_src}/b2
     WORKING_DIRECTORY ${boost_src}
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        ${boost_src}/b2 toolset=${BOOST_TOOLSET} cxxflags=${BOOST_CFLAGS}
+        ${boost_src}/b2
+        toolset=${BOOST_TOOLSET}
+        cxxflags=${BOOST_CFLAGS}
         --prefix=${boost_install_dir}
         -j ${CARLA_BUILD_CONCURRENCY}
         stage
@@ -50,7 +50,8 @@ add_custom_target(
     WORKING_DIRECTORY ${boost_src}
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${boost_src}/b2
-        toolset=${BOOST_TOOLSET} cxxflags=${BOOST_CFLAGS}
+        toolset=${BOOST_TOOLSET}
+        cxxflags=${BOOST_CFLAGS}
         --prefix=${boost_install_dir}
         -j ${CARLA_BUILD_CONCURRENCY}
         install
@@ -77,59 +78,88 @@ add_custom_target(
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(rpclib_libcxx_install_dir ${install_dir}/rpclib-libcxx)
-# set(rpclib_libstdcxx_install_dir ${install_dir}/rpclib-libstdcxx)
-# file(COPY rpclib DESTINATION ${CMAKE_CURRENT_LIST_DIR}/tmp/rpclib-libcxx)
-# file(COPY rpclib DESTINATION ${CMAKE_CURRENT_LIST_DIR}/tmp/rpclib-libstdcxx)
+set(rpclib_libstdcxx_install_dir ${install_dir}/rpclib-libstdcxx)
+file(COPY rpclib DESTINATION ${CMAKE_BINARY_DIR}/rpclib-libcxx)
+file(COPY rpclib DESTINATION ${CMAKE_BINARY_DIR}/rpclib-libstdcxx)
+set(rpclib_libcxx_src ${CMAKE_BINARY_DIR}/rpclib-libcxx/rpclib)
+set(rpclib_libstdcxx_src ${CMAKE_BINARY_DIR}/rpclib-libstdcxx/rpclib)
+
+set(libcxx_CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH} -DBOOST_NO_EXCEPTIONS -DASIO_NO_EXCEPTIONS ${UNREAL_HOSTED_CFLAGS}")
+set(libstdcxx_CMAKE_CXX_FLAGS "-fPIC -std=c++14")
 
 # libc++
-set(CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH} -DBOOST_NO_EXCEPTIONS -DASIO_NO_EXCEPTIONS ${UNREAL_HOSTED_CFLAGS}")
-set(CMAKE_INSTALL_PREFIX ${rpclib_libcxx_install_dir})
-add_subdirectory(rpclib)
+add_custom_target(
+    build_rpclib_libcxx
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -DCMAKE_CXX_FLAGS=${libcxx_CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${rpclib_libcxx_install_dir}
+    WORKING_DIRECTORY ${rpclib_libcxx_src}
+)
 
-# # libstdc++
-# set(CMAKE_CXX_FLAGS "-fPIC -std=c++14")
-# set(CMAKE_INSTALL_PREFIX ${rpclib_libstdcxx_install_dir})
-# add_subdirectory(tmp/rpclib-libstdcxx/rpclib)
+add_custom_target(
+    install_rpclib_libcxx
+    DEPENDS build_rpclib_libcxx
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${rpclib_libcxx_src}
+)
+
+# libstdcxx
+add_custom_target(
+    build_rpclib_libstdcxx
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -DCMAKE_CXX_FLAGS=${libstdcxx_CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${rpclib_libstdcxx_install_dir}
+    WORKING_DIRECTORY ${rpclib_libstdcxx_src}
+)
+
+add_custom_target(
+    install_rpclib_libstdcxx
+    DEPENDS build_rpclib_libstdcxx
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${rpclib_libstdcxx_src}
+)
+
+add_custom_target(
+    install_rpclib
+    DEPENDS install_rpclib_libcxx install_rpclib_libstdcxx
+)
 
 # recover cmake var
 set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
 set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
 
 
-add_custom_target(
-    install_rpclib_libcxx
-    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/rpclib
-)
-
-# add_custom_target(
-#     install_rpclib_libstdcxx
-#     COMMAND make install
-#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/tmp/rpclib-libstdcxx/rpclib
-# )
-
-# all
-
-# add_custom_target(
-#     clean_tmp
-#     COMMAND rm -rf ./tmp
-#     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-# )
-
-
 # gtest
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(gtest_install_dir ${install_dir}/gtest)
+file(COPY googletest DESTINATION ${CMAKE_BINARY_DIR})
+set(gtest_src ${CMAKE_BINARY_DIR}/googletest)
+set(gtest_install_dir ${install_dir}/googletest)
+
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH} -DBOOST_NO_EXCEPTIONS -fno-exceptions ${UNREAL_HOSTED_CFLAGS}")
 set(CMAKE_INSTALL_PREFIX "${gtest_install_dir}")
-add_subdirectory(googletest)
+
+add_custom_target(
+    build_gtest
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND} .
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    WORKING_DIRECTORY ${gtest_src}
+)
+
 
 add_custom_target(
     install_gtest
-    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/googletest
+    DEPENDS build_gtest
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY ${gtest_src}
 )
 
 # recover cmake var
@@ -140,19 +170,33 @@ set(CMAKE_INSTALL_PREFIX ${OLD_CMAKE_INSTALL_PREFIX})
 # Recast&Detour
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+file(COPY recastnavigation DESTINATION ${CMAKE_BINARY_DIR})
+set(recast_src ${CMAKE_BINARY_DIR}/recastnavigation)
 set(recast_install_dir ${install_dir}/recast)
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC")
 set(CMAKE_INSTALL_PREFIX ${recast_install_dir})
 set(RECASTNAVIGATION_DEMO False)
 set(RECASTNAVIGATION_TEST False)
-add_subdirectory(recastnavigation)
+
+add_custom_target(
+    build_recast
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND} .
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DRECASTNAVIGATION_DEMO=${RECASTNAVIGATION_DEMO}
+        -DRECASTNAVIGATION_TEST=${RECASTNAVIGATION_TEST}
+    WORKING_DIRECTORY ${recast_src}
+)
 
 add_custom_target(
     install_recast
-    COMMAND make install -j ${CARLA_BUILD_CONCURRENCY} &&
-        cp ${recast_install_dir}/bin/RecastBuilder ${RECAST_INSTALL_DIR}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ThirdParty/recastnavigation
+    DEPENDS build_recast
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    COMMAND cp ${recast_install_dir}/bin/RecastBuilder ${RECAST_INSTALL_DIR}
+    WORKING_DIRECTORY ${recast_src}
 )
 
 # recover cmake var
@@ -289,7 +333,7 @@ add_custom_target(
     install_chrono
     DEPENDS build_chrono
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make install
+        make install -j ${CARLA_BUILD_CONCURRENCY}
     WORKING_DIRECTORY ${chrono_build_dir}
 )
 
@@ -307,16 +351,17 @@ set(sqlite_install_dir ${install_dir}/sqlite)
 
 add_custom_target(
     build_sqlite
-    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC -w";
-        ./configure --prefix=${sqlite_install_dir}
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC";
+        ./configure --prefix=${sqlite_install_dir} &&
+        make -j ${CARLA_BUILD_CONCURRENCY}
     WORKING_DIRECTORY ${sqlite_src}
 )
 
 add_custom_target(
     install_sqlite
     DEPENDS build_sqlite
-    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC -w";
-        make && make install
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};CFLAGS="-fPIC";
+        make install
     WORKING_DIRECTORY ${sqlite_src}
 )
 
@@ -377,7 +422,7 @@ add_custom_target(
     install_proj
     DEPENDS build_proj
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make install
+        make install -j ${CARLA_BUILD_CONCURRENCY}
     WORKING_DIRECTORY ${proj_src}
 )
 
@@ -390,7 +435,7 @@ set(patchelf_install_dir ${install_dir}/patchelf)
 add_custom_target(
     build_patchelf
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        ./bootstrap.sh
+        ./bootstrap.sh &&
         ./configure --prefix=${patchelf_install_dir}
     WORKING_DIRECTORY ${patchelf_src}
 )
@@ -399,7 +444,7 @@ add_custom_target(
     install_patchelf
     DEPENDS build_patchelf
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make && make install
+        make -j ${CARLA_BUILD_CONCURRENCY} && make install
     WORKING_DIRECTORY ${patchelf_src}
 )
 
@@ -461,7 +506,7 @@ add_custom_target(
     install_osm2odr_client
     DEPENDS build_osm2odr_client
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make install
+        make install -j ${CARLA_BUILD_CONCURRENCY}
     WORKING_DIRECTORY ${osm2odr_client_src}
 )
 
@@ -472,20 +517,24 @@ set(server_CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -L
 set(server_CMAKE_INSTALL_PREFIX ${LIBCARLA_INSTALL_SERVER_FOLDER})
 set(server_PROJ_INCLUDE_DIR ${proj_install_dir}/include)
 set(server_PROJ_LIBRARY ${proj_install_dir}/lib/libproj.a)
-set(server_XercesC_INCLUDE_DIR ${proj_install_dir}/include)
-set(server_XercesC_LIBRARY ${proj_install_dir}/lib/libxerces-c.a)
+set(server_XercesC_INCLUDE_DIR ${xerces_install_dir}/include)
+set(server_XercesC_LIBRARY ${xerces_install_dir}/lib/libxerces-c.a)
+list(APPEND CMAKE_MODULE_PATH ${xerces_install_dir}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${proj_install_dir}/lib/cmake)
+
 
 add_custom_target(
     build_osm2odr_server
-    DEPENDS install_proj
+    DEPENDS install_proj install_xerces
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${CMAKE_COMMAND}
         -G ${server_G}
+        -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DCMAKE_CXX_FLAGS=${server_CMAKE_CXX_FLAGS}
         -DCMAKE_INSTALL_PREFIX=${server_CMAKE_INSTALL_PREFIX}
         -DPROJ_INCLUDE_DIR=${server_PROJ_INCLUDE_DIR}
         -DPROJ_LIBRARY=${server_PROJ_LIBRARY}
-        -DXercesC_INCLUDE_DIR=${server_XercesC_INCLUDE_DIR}
+        -DXercesC_INCLUDE_DIRS=${server_XercesC_INCLUDE_DIR}
         -DXercesC_LIBRARY=${server_XercesC_LIBRARY}
         .
     WORKING_DIRECTORY ${osm2odr_server_src}
@@ -495,7 +544,7 @@ add_custom_target(
     install_osm2odr_server
     DEPENDS build_osm2odr_server
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make install
+        make osm2odr -j ${CARLA_BUILD_CONCURRENCY} && make install
     WORKING_DIRECTORY ${osm2odr_server_src}
 )
 
@@ -510,7 +559,7 @@ add_custom_target(
 
 add_custom_target(
     third_party ALL
-    DEPENDS install_boost install_rpclib_libcxx
+    DEPENDS install_boost install_rpclib
             install_gtest install_recast install_libpng
             install_xerces install_eigen install_chrono
             install_patchelf install_osm2odr
