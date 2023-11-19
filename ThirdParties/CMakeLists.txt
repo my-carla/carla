@@ -229,9 +229,9 @@ set(eigen_install_include ${eigen_install_dir}/include)
 
 add_custom_target(
     install_eigen
-    COMMAND mkdir -p ${eigen_install_include}/unsupported/Eigen &&
-        cp -R ${eigen_src}/Eigen ${eigen_install_include} &&
-        cp -R ${eigen_src}/unsupported/Eigen ${eigen_install_include}/unsupported/Eigen
+    COMMAND mkdir -p ${eigen_install_include}/unsupported/Eigen
+    COMMAND cp -R ${eigen_src}/Eigen ${eigen_install_include}
+    COMMAND cp -R ${eigen_src}/unsupported/Eigen ${eigen_install_include}/unsupported
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -243,19 +243,20 @@ set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 # install eigen for chrono
 set(eigen4chrono_src ${CMAKE_CURRENT_LIST_DIR}/eigen-for-chrono)
 set(eigen4chrono_install_dir ${install_dir}/eigen-for-chrono)
-set(eigen4chrono_install_include ${eigen_install_dir}/include)
+set(eigen4chrono_install_include ${eigen4chrono_install_dir}/include)
 
 add_custom_target(
     install_eigen4chrono
-    COMMAND mkdir -p ${eigen4chrono_install_include}/unsupported/Eigen &&
-        cp -R ${eigen4chrono_src}/Eigen ${eigen4chrono_install_include} &&
-        cp -R ${eigen4chrono_src}/unsupported/Eigen ${eigen4chrono_install_include}/unsupported/Eigen
+    COMMAND mkdir -p ${eigen4chrono_install_include}/unsupported/Eigen
+    COMMAND cp -R ${eigen4chrono_src}/Eigen ${eigen4chrono_install_include}
+    COMMAND cp -R ${eigen4chrono_src}/unsupported/Eigen ${eigen4chrono_install_include}/unsupported
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # build and install chrono
 file(COPY chrono DESTINATION ${CMAKE_BINARY_DIR})
 set(chrono_src ${CMAKE_BINARY_DIR}/chrono)
+set(chrono_build_dir ${chrono_src}/build)
 set(chrono_install_dir ${install_dir}/chrono)
 
 
@@ -265,18 +266,23 @@ set(CMAKE_INSTALL_PREFIX ${chrono_install_dir})
 set(CMAKE_BUILD_TYPE Release)
 set(ENABLE_MODULE_VEHICLE ON)
 
+add_custom_command(
+    OUTPUT ${chrono_build_dir}
+    COMMAND mkdir -p ${chrono_build_dir}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
 add_custom_target(
     build_chrono
-    DEPENDS install_eigen4chrono
+    DEPENDS install_eigen4chrono ${chrono_build_dir}
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        ${CMAKE_COMMAND}
+        ${CMAKE_COMMAND} ..
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
         -DEIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DENABLE_MODULE_VEHICLE=${ENABLE_MODULE_VEHICLE}
-        .
-    WORKING_DIRECTORY ${chrono_src}
+    WORKING_DIRECTORY ${chrono_build_dir}
 )
 
 add_custom_target(
@@ -284,7 +290,7 @@ add_custom_target(
     DEPENDS build_chrono
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         make install
-    WORKING_DIRECTORY ${chrono_src}
+    WORKING_DIRECTORY ${chrono_build_dir}
 )
 
 
@@ -320,7 +326,7 @@ file(COPY proj-carla DESTINATION ${CMAKE_BINARY_DIR})
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(OLD_CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(proj_install_dir ${install_dir}/proj)
-set(proj_src ${CMAKE_BINARY_DIR}/proj)
+set(proj_src ${CMAKE_BINARY_DIR}/proj-carla)
 
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC -stdlib=libc++ -I${LLVM_INCLUDE} -Wl,-L${LLVM_LIBPATH}")
@@ -343,6 +349,7 @@ set(CMAKE_INSTALL_PREFIX ${proj_install_dir})
 
 add_custom_target(
     build_proj
+    DEPENDS install_sqlite
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${CMAKE_COMMAND}
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
@@ -368,6 +375,7 @@ add_custom_target(
 
 add_custom_target(
     install_proj
+    DEPENDS build_proj
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         make install
     WORKING_DIRECTORY ${proj_src}
@@ -384,7 +392,6 @@ add_custom_target(
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ./bootstrap.sh
         ./configure --prefix=${patchelf_install_dir}
-        make
     WORKING_DIRECTORY ${patchelf_src}
 )
 
@@ -392,7 +399,7 @@ add_custom_target(
     install_patchelf
     DEPENDS build_patchelf
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
-        make install
+        make && make install
     WORKING_DIRECTORY ${patchelf_src}
 )
 
@@ -426,7 +433,7 @@ set(osm2odr_client_src ${CMAKE_BINARY_DIR}/client/sumo)
 set(osm2odr_server_src ${CMAKE_BINARY_DIR}/server/sumo)
 
 # for client
-set(client_G "Eclipse CDT4 - make")
+set(client_G "Eclipse CDT4 - Unix Makefiles")
 set(client_CMAKE_CXX_FLAGS "-stdlib=libstdc++")
 set(client_CMAKE_INSTALL_PREFIX ${LIBCARLA_INSTALL_CLIENT_FOLDER})
 set(client_PROJ_INCLUDE_DIR ${proj_install_dir}/include)
@@ -436,6 +443,7 @@ set(client_XercesC_LIBRARY ${proj_install_dir}/lib/libxerces-c.a)
 
 add_custom_target(
     build_osm2odr_client
+    DEPENDS install_proj
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${CMAKE_COMMAND}
         -G ${client_G}
@@ -459,7 +467,7 @@ add_custom_target(
 
 
 # for server
-set(server_G "Eclipse CDT4 - make")
+set(server_G "Eclipse CDT4 - Unix Makefiles")
 set(server_CMAKE_CXX_FLAGS "-fPIC -std=c++14 -stdlib=libc++ -I${LLVM_INCLUDE} -L${LLVM_LIBPATH}")
 set(server_CMAKE_INSTALL_PREFIX ${LIBCARLA_INSTALL_SERVER_FOLDER})
 set(server_PROJ_INCLUDE_DIR ${proj_install_dir}/include)
@@ -469,6 +477,7 @@ set(server_XercesC_LIBRARY ${proj_install_dir}/lib/libxerces-c.a)
 
 add_custom_target(
     build_osm2odr_server
+    DEPENDS install_proj
     COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
         ${CMAKE_COMMAND}
         -G ${server_G}
@@ -504,6 +513,5 @@ add_custom_target(
     DEPENDS install_boost install_rpclib_libcxx
             install_gtest install_recast install_libpng
             install_xerces install_eigen install_chrono
-            install_sqlite install_proj install_patchelf
-            install_osm2odr
+            install_patchelf install_osm2odr
 )
