@@ -1,0 +1,35 @@
+set(LibCarla_CLIENT_BUILD_DIR ${CLIENT_BUILD_DIR}/LibCarla)
+set(LibCarla_SERVER_BUILD_DIR ${SERVER_BUILD_DIR}/LibCarla)
+file(MAKE_DIRECTORY ${LibCarla_CLIENT_BUILD_DIR})
+file(MAKE_DIRECTORY ${LibCarla_SERVER_BUILD_DIR})
+
+# client
+set(M_TOOLCHAIN ${LIBSTDCPP_TOOLCHAIN_FILE})
+set(M_BUILD_FOLDER ${LIBCARLA_BUILD_CLIENT_DIR}.client)
+set(M_INSTALL_FOLDER ${LIBCARLA_INSTALL_CLIENT_DIR})
+set(M_BUILD_TYPE Release)
+
+
+add_custom_target(
+    build_libcarla_client
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        ${CMAKE_COMMAND}
+        -G "Eclipse CDT4 - Unix Makefiles"
+        -DCMAKE_BUILD_TYPE=${M_BUILD_TYPE}
+        -DLIBCARLA_BUILD_DEBUG=${M_DEBUG}
+        -DLIBCARLA_BUILD_RELEASE=${M_RELEASE}
+        -DCMAKE_TOOLCHAIN_FILE=${M_TOOLCHAIN}
+        -DCMAKE_INSTALL_PREFIX=${M_INSTALL_FOLDER}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+        ${CMAKE_EXTRA_OPTIONS}
+        ${LIBCARLA_DIR}/cmake
+    WORKING_DIRECTORY ${}
+)
+
+add_custom_target(
+    install_libcarla_client
+    DEPENDS build_libcarla_client
+    COMMAND CC=$ENV{CC};CXX=$ENV{CXX};PATH=$ENV{PATH};
+        make install -j ${CARLA_BUILD_CONCURRENCY}
+    WORKING_DIRECTORY 
+)

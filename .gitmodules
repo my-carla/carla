@@ -38,6 +38,10 @@
 [submodule "ThirdParties/eigen-for-chrono"]
 	path = ThirdParties/eigen-for-chrono
 	url = git@github.com:my-carla/eigen-for-chrono.git
+[submodule "ThirdParties/sumo"]
+	path = ThirdParties/sumo
+	url = git@github.com:my-carla/sumo.git
+	branch = aaron/defaultsidewalkwidth
 [submodule "osm-world-renderer/ThirdParties/libosmscout"]
 	path = osm-world-renderer/ThirdParties/libosmscout
 	url = https://github.com/Framstag/libosmscout.git
@@ -46,9 +50,9 @@
 	url = https://github.com/sammycage/lunasvg.git
 [submodule "ExtraPlugins/StreetMap"]
 	path = ExtraPlugins/StreetMap
-	url = https://github.com/carla-simulator/StreetMap.git
-	branch = master
-[submodule "ThirdParties/sumo"]
-	path = ThirdParties/sumo
-	url = git@github.com:my-carla/sumo.git
-	branch = aaron/defaultsidewalkwidth
+	url = https://github.com/my-carla/StreetMap.git
+	branch = carla
+[submodule "ExtraPlugins/HoudiniEngineForUnreal"]
+	path = ExtraPlugins/HoudiniEngineForUnreal
+	url = git@github.com:my-carla/HoudiniEngineForUnreal.git
+	branch = carla

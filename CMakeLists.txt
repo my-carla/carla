@@ -9,4 +9,6 @@ include("cmake/init.cmake")
 
 
 add_subdirectory("ThirdParties")
-# add_subdirectory("LibCarla/cmake")
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/init.cmake)
+add_subdirectory("LibCarla")
