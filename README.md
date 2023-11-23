@@ -1,7 +1,7 @@
 CARLA Simulator
 ===============
 
-[![Build Status](https://app.travis-ci.com/my-carla/carla.svg?branch=master)](https://app.travis-ci.com/my-carla/carla)
+[![C/C++ CI](https://github.com/my-carla/carla/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/my-carla/carla/actions/workflows/c-cpp.yml)
 [![Documentation](https://readthedocs.org/projects/carla/badge/?version=latest)](http://carla.readthedocs.io)
 
 [![carla.org](Docs/img/btn/web.png)](http://carla.org)
