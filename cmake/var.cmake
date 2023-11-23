@@ -1,25 +1,34 @@
-set(install_dir ${PROJECT_SOURCE_DIR}/Install)
 set(UE4_ROOT $ENV{UE4_ROOT})
+set(CC $ENV{CC})
+set(CXX $ENV{CXX})
+
 set(CARLA_BUILD_CONCURRENCY 8)
 set(PY_VERSION 3)
+
+set(INSTALL_DIR ${PROJECT_SOURCE_DIR}/Install)
+set(SERVER_INSTALL_DIR ${INSTALL_DIR}/Server)
+set(CLIENT_INSTALL_DIR ${INSTALL_DIR}/Client)
+
+set(CARLA_PYTHONAPI_DIR ${PROJECT_SOURCE_DIR}/PythonAPI)
+set(CARLA_PYTHONAPI_CARLA_DIR ${CARLA_PYTHONAPI_DIR}/carla)
+set(CARLAUE4_DIR ${PROJECT_SOURCE_DIR}/Unreal/CarlaUE4)
+set(CARLAUE4_PLUGIN_DIR ${CARLAUE4_DIR}/Plugins/Carla)
+
+################## envs ################
+# common
 set(LLVM_INCLUDE "${UE4_ROOT}/Engine/Source/ThirdParty/Linux/LibCxx/include/c++/v1")
 set(LLVM_LIBPATH "${UE4_ROOT}/Engine/Source/ThirdParty/Linux/LibCxx/lib/Linux/x86_64-unknown-linux-gnu")
 set(UNREAL_HOSTED_CFLAGS "--sysroot=${UE4_ROOT}/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v17_clang-10.0.1-centos7/x86_64-unknown-linux-gnu/")
-set(RECAST_INSTALL_DIR "${PROJECT_SOURCE_DIR}/Util/DockerUtils/dist")
 
-set(CARLA_PYTHONAPI_ROOT_DIR ${PROJECT_SOURCE_DIR}/PythonAPI)
-set(CARLA_PYTHONAPI_SOURCE_DIR ${CARLA_PYTHONAPI_ROOT_DIR}/carla)
-set(LIBCARLA_INSTALL_CLIENT_DIR ${CARLA_PYTHONAPI_SOURCE_DIR}/dependencies)
-
-set(CARLAUE4_PLUGIN_ROOT_DIR ${PROJECT_SOURCE_DIR}/Unreal/CarlaUE4/Plugins/Carla)
-set(LIBCARLA_INSTALL_SERVER_DIR ${CARLAUE4_PLUGIN_ROOT_DIR}/CarlaDependencies)
-
-set(CARLAUE4_ROOT_FOLDER ${PROJECT_SOURCE_DIR}/Unreal/CarlaUE4)
-set(CARLAUE4_PLUGIN_ROOT_FOLDER ${CURPROJECT_SOURCE_DIRDIR}/Unreal/CarlaUE4/Plugins/Carla)
-
-
-set(LIBCARLA_DIR ${PROJECT_SOURCE_DIR}/LibCarla)
-
-
+# file or dirs
 set(CLIENT_BUILD_DIR ${CMAKE_BINARY_DIR}/client)
 set(SERVER_BUILD_DIR ${CMAKE_BINARY_DIR}/server)
+set(COMMON_BUILD_DIR ${CMAKE_BINARY_DIR}/common)
+set(CARLA_CONFIG_CMAKE ${CMAKE_CURRENT_LIST_DIR}/config.cmake)
+set(CARLA_VAR_CMAKE ${CMAKE_CURRENT_LIST_DIR}/var.cmake)
+set(CLIENT_TOOLCHAIN_CMAKE_IN ${CMAKE_CURRENT_LIST_DIR}/ClientToolChain.cmake.in)
+set(SERVER_TOOLCHAIN_CMAKE_IN ${CMAKE_CURRENT_LIST_DIR}/ServerToolChain.cmake.in)
+set(CLIENT_TOOLCHAIN_CMAKE ${CMAKE_BINARY_DIR}/ClientToolChain.cmake)
+set(SERVER_TOOLCHAIN_CMAKE ${CMAKE_BINARY_DIR}/ServerToolChain.cmake)
+set(CARLA_THIRD_PARTIES_INFO_CMAKE_IN ${CMAKE_CURRENT_LIST_DIR}/ThirdPartiesInfo.cmake.in)
+set(CARLA_THIRD_PARTIES_INFO_CMAKE ${CMAKE_BINARY_DIR}/ThirdPartiesInfo.cmake)

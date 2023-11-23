@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(OsmMapRenderer)
-set(osm_3rd_install_dir ${install_dir}/OsmRenderer3rd)
 
-# Libosmscout and Luna SVG Library
-add_subdirectory(ThirdParties)
-
-include_directories(${osm_3rd_install_dir}/include)
-include_directories(${osm_3rd_install_dir}/include/lunasvg)
-link_directories(${osm_3rd_install_dir}/lib)
+include_directories(
+    ${OSMSCOUT_CLIENT_INSTALL_DIR}/include
+    ${LUNASVG_CLIENT_INSTALL_DIR}/include/lunasvg
+)
+link_directories(
+    ${LUNASVG_CLIENT_INSTALL_DIR}/lib
+    ${OSMSCOUT_CLIENT_INSTALL_DIR}/lib
+)
 
 add_definitions(-D_USE_MATH_DEFINES)
 
@@ -15,7 +16,11 @@ add_definitions(-D_USE_MATH_DEFINES)
 add_library(OsmRenderer OsmRenderer/src/OsmRenderer.cpp)
 target_sources(OsmRenderer PRIVATE OsmRenderer/src/MapDrawer.cpp)
 target_sources(OsmRenderer PRIVATE OsmRenderer/src/MapRasterizer.cpp)
-target_include_directories( OsmRenderer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/OsmRenderer/include)
+target_compile_features(OsmRenderer PRIVATE cxx_std_17)
+target_include_directories( OsmRenderer PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/OsmRenderer/include
+    ${BOOST_INSTALL_DIR}/include
+)
 
 add_executable(osm-world-renderer OsmRenderer/main.cpp)
 target_link_libraries(osm-world-renderer OsmRenderer)

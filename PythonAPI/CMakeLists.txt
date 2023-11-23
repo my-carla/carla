@@ -1,4 +1,4 @@
-set(PATH ${LIBCARLA_INSTALL_CLIENT_FOLDER}/bin:${PATH})
+set(PATH ${LIBCARLA_INSTALL_CLIENT_FOLDER}/bin:$ENV{PATH})
 
 find_package(Python COMPONENTS Interpreter Development)
 
@@ -15,7 +15,7 @@ add_custom_target(
 add_custom_target(
     build_python_api
     DEPENDS clean_intermediate
-    COMMAND ${Python_EXECUTABLE}
+    COMMAND PATH=${PATH}; ${Python_EXECUTABLE}
         setup.py bdist_egg bdist_wheel --dist-dir dist/.tmp
     COMMAND cp dist/.tmp/$(ls dist/.tmp | grep .whl) dist
     COMMAND rm -rf dist/.tmp

@@ -23,3 +23,4 @@ Config/CarSimConfig.ini
 .vscode
 CMakeLists.txt
 Makefile
+!cmake/

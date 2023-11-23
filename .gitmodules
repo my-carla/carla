@@ -42,11 +42,12 @@
 	path = ThirdParties/sumo
 	url = git@github.com:my-carla/sumo.git
 	branch = aaron/defaultsidewalkwidth
-[submodule "osm-world-renderer/ThirdParties/libosmscout"]
-	path = osm-world-renderer/ThirdParties/libosmscout
+[submodule "ThirdParties/libosmscout"]
+	path = ThirdParties/libosmscout
 	url = https://github.com/Framstag/libosmscout.git
-[submodule "osm-world-renderer/ThirdParties/lunasvg"]
-	path = osm-world-renderer/ThirdParties/lunasvg
+	branch = e83e4881a4adc69c5a4bcc05de5e1f23ebf06238
+[submodule "ThirdParties/lunasvg"]
+	path = ThirdParties/lunasvg
 	url = https://github.com/sammycage/lunasvg.git
 [submodule "ExtraPlugins/StreetMap"]
 	path = ExtraPlugins/StreetMap

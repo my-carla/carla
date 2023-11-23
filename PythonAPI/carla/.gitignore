@@ -1,4 +1,5 @@
 *.egg-info
 build
-dependencies
+dependencies/include
+dependencies/lib
 dist

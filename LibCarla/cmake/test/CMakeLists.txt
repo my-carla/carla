@@ -14,7 +14,8 @@ endif()
 
 link_directories(
     ${RPCLIB_LIB_PATH}
-    ${GTEST_LIB_PATH})
+    ${GTEST_LIB_PATH}
+)
 
 file(GLOB libcarla_test_sources
     "${libcarla_source_path}/carla/profiler/*.cpp"

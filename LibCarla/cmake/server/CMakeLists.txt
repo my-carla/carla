@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(libcarla-server)
 
+include(${CARLA_THIRD_PARTIES_INFO_FILE})
+include(${CARLA_CONFIG_FILE})
+include(${CMAKE_TOOLCHAIN_FILE})
+
 # Install libc++ shared libraries.
 file(GLOB LibCXX_Libraries "${LLVM_LIB_PATH}/libc++*")
 install(FILES ${LibCXX_Libraries} DESTINATION lib)
