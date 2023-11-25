@@ -8,7 +8,6 @@ configure_file(
     ${SERVER_TOOLCHAIN_CMAKE_IN} ${SERVER_TOOLCHAIN_CMAKE}
 )
 
-
 if(BUILD_CLIENT)
     # client
     set(CLIEBT_CMAKE_EXTRA_OPTIONS "")
@@ -54,6 +53,6 @@ add_custom_target(
 add_custom_target(
     install_libcarla
     DEPENDS build_libcarla
-    COMMAND make && make install -j ${CARLA_BUILD_CONCURRENCY}
+    COMMAND make -j ${CARLA_BUILD_CONCURRENCY} && make install
     WORKING_DIRECTORY ${LIBCARLA_BUILD_DIR}
 )

@@ -20,6 +20,7 @@ configure_file(${CARLA_THIRD_PARTIES_INFO_CMAKE_IN}
 )
 include(${CARLA_THIRD_PARTIES_INFO_CMAKE})
 
+
 if(BUILD_THIRD_PARTY)
     add_subdirectory(ExtraPlugins)
     add_subdirectory(ThirdParties)

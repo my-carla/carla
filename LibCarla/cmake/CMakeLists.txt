@@ -4,6 +4,10 @@ project(libcarla)
 message(STATUS "Build debug:   ${LIBCARLA_BUILD_DEBUG}")
 message(STATUS "Build release: ${LIBCARLA_BUILD_RELEASE}")
 message(STATUS "Build test:    ${LIBCARLA_BUILD_TEST}")
+message(STATUS "CARLA_THIRD_PARTIES_INFO_FILE: ${CARLA_THIRD_PARTIES_INFO_FILE}")
+message(STATUS "CARLA_CONFIG_FILE: ${CARLA_CONFIG_FILE}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+
 
 set(libcarla_source_path "${PROJECT_SOURCE_DIR}/../source")
 set(libcarla_source_thirdparty_path "${libcarla_source_path}/third-party")
