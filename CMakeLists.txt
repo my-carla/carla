@@ -39,7 +39,7 @@ else()
     endif(NOT BUILD_CLIENT)
 
     if(BUILD_PYTHON_API)
-        add_subdirectory(PythinAPI)
+        add_subdirectory(PythonAPI)
     endif(BUILD_PYTHON_API)
 endif(BUILD_THIRD_PARTY)
 

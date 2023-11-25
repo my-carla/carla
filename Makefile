@@ -6,11 +6,11 @@ rebuild: clean build
 
 
 .PHONY: build
-build: build_ue4 build_client
+build: build_ue4 build_client build_python_api
 
 
 .PHONY: build_client
-build_client: # build_third_party
+build_client: build_third_party
 	@-mkdir -p build
 	cd build && \
 	cmake -DBUILD_THIRD_PARTY=OFF -DBUILD_CLIENT=ON -DBUILD_PYTHON_API=OFF .. && \
@@ -18,11 +18,12 @@ build_client: # build_third_party
 
 
 .PHONY: build_server
-build_server: # build_third_party
+build_server: build_third_party
 	@-mkdir -p build
 	cd build && \
 	cmake -DBUILD_THIRD_PARTY=OFF -DBUILD_CLIENT=OFF -DBUILD_PYTHON_API=OFF .. && \
 	make install_libcarla
+
 
 .PHONY: build_ue4
 build_ue4: build_server
@@ -30,11 +31,12 @@ build_ue4: build_server
 	cd build && \
 	make build_carla_ue4
 
-# .PHONY: build_python_api
-# build_python_api: build_client
-# 	cd build && \
-# 	cmake -DBUILD_PYTHON_API=ON .. && \
-# 	make install_libcarla
+
+.PHONY: build_python_api
+build_python_api: build_client
+	cd build && \
+	cmake -DBUILD_PYTHON_API=ON .. && \
+	make build_python_api
 
 
 .PHONY: build_third_party
